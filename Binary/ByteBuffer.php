@@ -73,18 +73,32 @@ class ByteBuffer implements \JsonSerializable, \Serializable {
         return $this->length;
     }
 
-    public function getUint16Val($offset) {
+     public function getUint16Val($offset) {
         if ($offset < 0 || ($offset + 2) > $this->length) {
             throw new WebAuthnException('ByteBuffer: Invalid offset', WebAuthnException::BYTEBUFFER);
         }
-        return unpack('n', $this->data, $offset)[1];
+        //
+        if (version_compare(phpversion(), '7.1.0', '<')) {
+        	$val = unpack('n', \substr($this->data,$offset))[1];
+        }else{
+        	$val = unpack('n', $this->data, $offset)[1];
+        }
+        // Signed integer overflow causes signed negative numbers
+        if ($val < 0) {
+        	throw new WebAuthnException('ByteBuffer: Value out of integer range.', WebAuthnException::BYTEBUFFER);
+        }
+        return $val;
     }
 
     public function getUint32Val($offset) {
         if ($offset < 0 || ($offset + 4) > $this->length) {
             throw new WebAuthnException('ByteBuffer: Invalid offset', WebAuthnException::BYTEBUFFER);
         }
-        $val = unpack('N', $this->data, $offset)[1];
+        if (version_compare(phpversion(), '7.1.0', '<')) {
+        	$val = unpack('N', \substr($this->data,$offset))[1];
+        }else{
+        	$val = unpack('N', $this->data, $offset)[1];
+        }
         
         // Signed integer overflow causes signed negative numbers
         if ($val < 0) {
@@ -100,8 +114,12 @@ class ByteBuffer implements \JsonSerializable, \Serializable {
         if ($offset < 0 || ($offset + 8) > $this->length) {
             throw new WebAuthnException('ByteBuffer: Invalid offset', WebAuthnException::BYTEBUFFER);
         }
-        $val = unpack('J', $this->data, $offset)[1];
-
+        if (version_compare(phpversion(), '7.1.0', '<')) {
+        	$val = unpack('J', \substr($this->data,$offset))[1];
+        }else{
+        	$val = unpack('J', $this->data, $offset)[1];
+        }
+        
         // Signed integer overflow causes signed negative numbers
         if ($val < 0) {
             throw new WebAuthnException('ByteBuffer: Value out of integer range.', WebAuthnException::BYTEBUFFER);
@@ -132,14 +150,22 @@ class ByteBuffer implements \JsonSerializable, \Serializable {
         if ($offset < 0 || ($offset + 4) > $this->length) {
             throw new WebAuthnException('ByteBuffer: Invalid offset', WebAuthnException::BYTEBUFFER);
         }
-        return unpack('G', $this->data, $offset)[1];
+        if (version_compare(phpversion(), '7.1.0', '<')) {
+        	return unpack('G', \substr($this->data,$offset))[1];
+        }else{
+       		return unpack('G', $this->data, $offset)[1];
+        }
     }
 
     public function getDoubleVal($offset) {
         if ($offset < 0 || ($offset + 8) > $this->length) {
             throw new WebAuthnException('ByteBuffer: Invalid offset', WebAuthnException::BYTEBUFFER);
         }
-        return unpack('E', $this->data, $offset)[1];
+        if (version_compare(phpversion(), '7.1.0', '<')) {
+        	return unpack('E', \substr($this->data,$offset))[1];
+        }else{
+        	return unpack('E', $this->data, $offset)[1];
+        }
     }
 
     /**
